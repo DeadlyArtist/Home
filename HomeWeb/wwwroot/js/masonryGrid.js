@@ -96,7 +96,7 @@ class MasonryGrid {
         const remainingSpace = containerWidth - totalColumnSpace;
 
         // Calculate the extra width to distribute across all columns
-        const stretchPerColumn = remainingSpace > 0 ? remainingSpace / columnCount : 0;
+        const stretchPerColumn = remainingSpace / columnCount;
 
         const itemWidth = this.minWidth + stretchPerColumn;  // Add the extra space evenly to each column
 
