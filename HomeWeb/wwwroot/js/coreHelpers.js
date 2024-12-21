@@ -9,8 +9,16 @@ function _tryRemoveIndexHtml() {
         window.history.replaceState(null, "", newUrl);
     }
 }
-
 _tryRemoveIndexHtml();
+
+function _tryRemoveEmptyHash() {
+    let urlWithoutHash = window.location.href.split('#')[0];
+    let hash = window.location.hash;
+    if (hash != null && hash.length < 2) history.replaceState(null, "", urlWithoutHash);
+}
+window.addEventListener('hashchange', _tryRemoveEmptyHash);
+window.addEventListener('load-silently', _tryRemoveEmptyHash);
+_tryRemoveEmptyHash();
 
 
 pressedKeys = {};
@@ -25,9 +33,24 @@ function onKeyUp(event) {
 
 document.addEventListener('keydown', onKeyDown);
 document.addEventListener('keyup', onKeyUp);
+window.addEventListener('focus', () => {
+    Object.keys(pressedKeys).forEach(key => delete pressedKeys[key]); // Delete all keys upon gaining focus to prevent missing a keyup from outside the window
+});
 
 async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function sleepUntil(targetTime) {
+    const currentTime = new Date().getTime();
+    const delay = targetTime - currentTime;
+
+    if (delay <= 0) {
+        // If the target time is in the past or now, resolve immediately
+        return Promise.resolve();
+    } else {
+        return sleep(delay);
+    }
 }
 
 function generateUniqueId() {
@@ -106,16 +129,6 @@ function copyToClipboard(text) {
     navigator.clipboard.writeText(text);
 }
 
-function removeHash() {
-    // Get the current URL without the hash
-    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + window.location.search;
-    // Replace the current history state with the clean URL
-    history.replaceState(null, "", cleanUrl);
-}
-
-function goToUrl(url) {
-    window.location.href = url;
-}
 
 function spliceChildren(element, start = -1, deleteCount = 0, ...newChildren) {
     if (start < 0) start = element.children.length + 1 + start;
@@ -154,12 +167,27 @@ function wrapElement(element, wrapper) {
     observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
 
-function onBodyCreated(callback) {
-    if (document.body) {
-        callback();
-    } else {
-        window.addEventListener('body-created', e => callback());
-    }
+async function onBodyCreated(callback) {
+    return new Promise((resolve, reject) => {
+        let _callback = () => { callback(); resolve(); }
+        if (document.body) {
+            _callback();
+        } else {
+            window.addEventListener('body-created', e => _callback());
+        }
+    });
+}
+
+let isHtmlBeforeScriptsLoaded = false;
+async function onBeforeScriptsAfterHtml(callback) {
+    return new Promise((resolve, reject) => {
+        let _callback = () => { callback(); resolve(); }
+        if (isHtmlBeforeScriptsLoaded) {
+            _callback();
+        } else {
+            window.addEventListener('before-scripts', e => _callback());
+        }
+    });
 }
 
 const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
@@ -188,9 +216,13 @@ function logStorageSizes() {
     ; console.log("Total = " + (_lsTotal / 1024).toFixed(2) + " KB");
 }
 
-function replaceElementWithClone(element) {
-    const clone = element.cloneNode(true);
-    element.parentNode.replaceChild(clone, element);
+function replaceNode(oldNode, newNode) {
+    return oldNode.parentNode.replaceChild(newNode, oldNode);
+}
+
+function replaceNodeWithClone(node) {
+    const clone = node.cloneNode(true);
+    replaceNode(node, clone);
     return clone;
 }
 
@@ -210,18 +242,89 @@ function replaceTextNodeWithHTML(node, html) {
     }
 }
 
+function getTextNodesFromArray(elements, settings = null) {
+    settings ??= {};
+    let nodes = [];
+    if (!elements) return nodes;
+
+    for (let element of elements) {
+        (function worker(node, matchedInclude = false) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                if (!settings.includeQuery || matchedInclude) nodes.push(node);
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                if (settings.excludeQuery && node.matches(settings.excludeQuery)) return;
+                for (const child of node.childNodes) {
+                    worker(child, matchedInclude || node.matches(settings.includeQuery));
+                }
+            }
+        })(element);
+    }
+
+    return nodes;
+}
+
+function getTextNodes(element, settings = null) {
+    return getTextNodesFromArray([element], settings);
+}
+
+function getTextNodesFast(element) {
+    // Get all text nodes within the element
+    let walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null);
+    let nodes = [];
+    let node;
+    while ((node = walker.nextNode())) {
+        nodes.push(node);
+    }
+    return nodes;
+}
+
+function getTextFromTextNodes(textNodes) {
+    let text = "";
+    for (let node of textNodes) {
+        text += node.nodeValue;
+    }
+    return text;
+}
+
+// Find text nodes overlapping with a range
+function findTextNodesByIndices(nodes, rangeStart, rangeEnd) {
+    let result = {};
+    let offset = 0;
+    for (let node of nodes) {
+        let start = offset;
+        let end = start + node.nodeValue.length - 1;
+        if (end < rangeStart) {
+            offset += node.nodeValue.length;
+            continue;
+        }
+        if (start > rangeEnd) break;
+
+        let overlapStart = Math.max(start, rangeStart);
+        result[overlapStart] = { node: node, relativeIndex: overlapStart - offset };
+        offset += node.nodeValue.length;
+    }
+    return result;
+}
+
+function applyFunctionToAllNodes(node, fn, nodeFilter = NodeFilter.SHOW_ALL) {
+    const walker = document.createTreeWalker(
+        element,
+        nodeFilter, // Only process element nodes
+        null,
+        false
+    );
+
+    do {
+        fn(walker.currentNode);
+    } while (walker.nextNode());
+}
+
+function applyFunctionToAllElements(element, fn) {
+    applyFunctionToAllNodes(element, fn, NodeFilter.SHOW_ELEMENT);
+}
+
 function clamp(number, min, max) {
     return Math.max(min, Math.min(number, max));
-}
-
-function getUrlBase() {
-    return window.location.href.split('?')[0].split('#')[0];
-}
-
-function createObjectUrl(object, options = undefined) {
-    const blob = new Blob([object], options);
-    const blobUrl = URL.createObjectURL(blob);
-    return blobUrl;
 }
 
 /**
@@ -239,3 +342,13 @@ async function parallel(iterator, asyncFunc) {
     if (errors.length != 0) throw errors[0];
     return results;
 }
+
+function debounce(func, delay) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+function doNothing() { }

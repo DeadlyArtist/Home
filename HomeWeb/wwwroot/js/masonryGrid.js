@@ -6,9 +6,11 @@ class MasonryGrid {
 
     constructor(gridElement) {
         this.grid = gridElement;
+        let self = this;
+        this.debouncedResize = debounce(() => self.resize());
         this.updateValues();
 
-        this.resize();
+        this.debouncedResize();
         this.initObservers();
     }
 
@@ -44,31 +46,15 @@ class MasonryGrid {
             for (const mutation of mutations) {
                 if (mutation.target != this.grid && mutation.target.parentElement != this.grid) continue;
 
-                if (
-                    mutation.type === "childList" &&
-                    ([...mutation.addedNodes, ...mutation.removedNodes].some(node => node.classList?.contains("masonryGridItem")))
-                ) {
-                    itemChanged = true; // A relevant grid item was added or removed
-                    break;
-                } else if (
-                    mutation.type === "attributes" &&
-                    mutation.target.classList.contains("masonryGridItem")
-                ) {
-                    itemChanged = true; // A relevant grid item had its visibility/style changed
-                    break;
+                if (mutation.type === "childList" && ([...mutation.addedNodes, ...mutation.removedNodes].some(node => node.classList?.contains("masonryGridItem")))) {
+                    this.debouncedResize();
                 }
-            }
-
-            if (itemChanged) {
-                this.resize();
             }
         });
 
         observer.observe(this.grid, {
             childList: true,  // Detect when children (grid-items) are added or removed
             subtree: true,
-            attributes: true, // Detect if grid items' visibility changes (style change)
-            attributeFilter: ['style', 'class']
         });
 
         const images = this.grid.querySelectorAll('.masonryGridItem img')
@@ -79,71 +65,82 @@ class MasonryGrid {
         });
     }
 
-    resize() {
+    resize(rerun = false) {
         if (this.resizeDisabled || MasonryGrid.allResizeDisabled) return;
 
         const grid = this.grid;
+        if (grid.children.length === 0) return;
 
-        // Calculate container width and minimum number of columns based on `minWidth`
-        const containerWidth = grid.clientWidth;
+        // Measure container and calculate layout - reading phase
+        const isScrollbarPresent = isYScrollbarPresent() || rerun;
+        const scrollbarWidth = window.innerWidth < 750 ? 0 : getScrollbarWidth(); // Special handling for container window width
+        // We just assume that a scrollbar will become present upon resize
+        // This way, we only resize twice when there weren't many items to begin with
+        const containerWidth = grid.clientWidth - (isScrollbarPresent ? 0 : Math.floor(scrollbarWidth / 2));
         const columnCount = Math.max(
             1,
             Math.floor((containerWidth + this.gapX) / (this.minWidth + this.gapX))
         );
 
-        // Calculate how much space is left after determining the columns
         const totalColumnSpace = columnCount * this.minWidth + (columnCount - 1) * this.gapX;
         const remainingSpace = containerWidth - totalColumnSpace;
+        const stretchPerColumn = remainingSpace > 0 ? remainingSpace / columnCount : remainingSpace;
+        const itemWidth = this.minWidth + stretchPerColumn;
 
-        // Calculate the extra width to distribute across all columns
-        const stretchPerColumn = remainingSpace / columnCount;
-
-        const itemWidth = this.minWidth + stretchPerColumn;  // Add the extra space evenly to each column
-
-        // Initialize an array to store heights for each column
+        const items = Array.from(grid.querySelectorAll(":scope > .masonryGridItem"));
         const columns = Array(columnCount).fill(0);
-
-        // Process all grid items
-        const items = grid.querySelectorAll(":scope > .masonryGridItem");
-        const totalItems = items.length;
-
-        // Center align: calculate horizontal start offset if centering is needed
+        const positions = []; // Store positions for a later write phase
         let startOffset = 0;
-        if (this.centerAtStart && totalItems < columnCount) {
-            // If fewer items than columns, we'll calculate a center offset
-            const emptySpace = containerWidth - (totalItems * itemWidth + (totalItems - 1) * this.gapX);
-            startOffset = emptySpace / 2; // Equal offset on both sides
+
+        if (this.centerAtStart && items.length < columnCount) {
+            const emptySpace = containerWidth - (items.length * itemWidth + (items.length - 1) * this.gapX);
+            startOffset = emptySpace / 2; // Center alignment offset
         }
 
-        items.forEach(item => {
-            // Determine shortest column
+        const visibleItems = items.filter(item => item.offsetParent !== null);
+
+        // Batch write widths
+        visibleItems.forEach(item => {
+            item.style.width = `${itemWidth}px`;
+        });
+
+        // Batch read height and calculate position
+        visibleItems.forEach(item => {
             const minHeight = Math.min(...columns);
             const columnIndex = columns.indexOf(minHeight);
-
-            // Calculate x (horizontal) & y (vertical) positions for the item
-            const xPos = startOffset + (columnIndex * (itemWidth + this.gapX));
+            const xPos = Math.floor(startOffset + (columnIndex * (itemWidth + this.gapX)));
             const yPos = columns[columnIndex];
 
-            // Apply positioning and sizing to grid item
-            item.style.width = `${itemWidth}px`;
-            item.style.transform = `translate(${xPos}px, ${yPos}px)`;
+            // Store positions for later updates
+            positions.push({ item, xPos, yPos });
 
-            // Measure and update the column height
+            // Estimate height - avoids layout thrashing
             const contentHeight = item.offsetHeight;
             columns[columnIndex] += contentHeight + this.gapY;
         });
 
-        // Set the container's height to fit grid items
-        grid.style.height = `${Math.max(...columns)}px`;
+        // Batch write position
+        positions.forEach(({ item, xPos, yPos }) => {
+            item.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+        });
+
+        // Set container height
+        const gridHeight = Math.max(...columns);
+        grid.style.height = `${gridHeight}px`;
+
+        // If we guessed wrongly that a scrollbar would appear after resize, resize again without that assumption
+        if (!rerun && containerWidth < grid.clientWidth) this.resize(true);
     }
 }
 
 function resizeMasonryGrid(grid) {
-    let masonry = grid.__masonry;
+    if (!grid.classList.contains('masonryGrid')) return;
+
+    let masonry = grid._masonry;
     if (masonry) {
-        masonry.resize();
+        masonry.debouncedResize();
     } else {
-        grid.__masonry = new MasonryGrid(grid);
+        grid._masonry = new MasonryGrid(grid);
     }
 }
 
@@ -156,8 +153,9 @@ onBodyCreated(() => {
     new MutationObserver(mutations => {
         mutations.forEach(mutation => {
             mutation.addedNodes.forEach(node => {
-                if (node.nodeType === 1 && node.classList.contains("masonryGrid")) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
                     resizeMasonryGrid(node);
+                    node.querySelectorAll('.masonryGrid').forEach(resizeMasonryGrid);
                 }
             });
         });
