@@ -1,8 +1,5 @@
-.tooltipContainer {
-  display: none !important;
-}
 
-#tooltip {
+.tooltip {
   position: absolute;
   top: 2px;
   z-index: 9999;
@@ -15,7 +12,7 @@
   background-color: var(--tooltip-background-color);
 }
 
-[color-scheme="light"] #tooltip {
+[color-scheme="light"] .tooltip {
   border: 1px solid var(--border-color);
 }
 
@@ -23,7 +20,8 @@
 .cardTooltip {
   border-radius: 10px;
   padding: 32px;
-  width: 450px;
+  width: max-content;
+  max-width: min(calc(100vw - 12px), 700px);
 }
 
 @media (max-width: 450px) {
@@ -35,10 +33,11 @@
 .smallTooltip {
   border-radius: 5px;
   padding: 8px;
-  width: min(max-content, 400px);
+  width: max-content;
+  max-width: min(calc(100vw - 12px), 400px);
 }
 
-#tooltip[tooltip-position="top"]::after {
+.tooltip[tooltip-position="top"]::after {
   content: " ";
   position: absolute;
   top: 100%;
@@ -50,7 +49,7 @@
   border-color: var(--tooltip-background-color) transparent transparent transparent;
 }
 
-#tooltip[tooltip-position="bottom"]::after {
+.tooltip[tooltip-position="bottom"]::after {
   content: " ";
   position: absolute;
   bottom: 100%;
@@ -62,7 +61,7 @@
   border-color: transparent transparent var(--tooltip-background-color) transparent;
 }
 
-#tooltip[tooltip-position="left"]::after {
+.tooltip[tooltip-position="left"]::after {
   content: " ";
   position: absolute;
   top: 50%;
@@ -74,7 +73,7 @@
   border-color: transparent transparent transparent var(--tooltip-background-color);
 }
 
-#tooltip[tooltip-position="right"]::after {
+.tooltip[tooltip-position="right"]::after {
   content: " ";
   position: absolute;
   top: 50%;
@@ -86,14 +85,30 @@
   border-color: transparent var(--tooltip-background-color) transparent transparent;
 }
 
-.colorTooltips .replaceTooltips .tooltipTarget {
+[color-scheme="light"] .tooltip[tooltip-position="top"]::after {
+  border-color: var(--border-color) transparent transparent transparent;
+}
+
+[color-scheme="light"] .tooltip[tooltip-position="bottom"]::after {
+  border-color: transparent transparent var(--border-color) transparent;
+}
+
+[color-scheme="light"] .tooltip[tooltip-position="left"]::after {
+  border-color: transparent transparent transparent var(--border-color);
+}
+
+[color-scheme="light"] .tooltip[tooltip-position="right"]::after {
+  border-color: transparent var(--border-color) transparent transparent;
+}
+
+.colorTooltips .markTooltips .tooltipTarget {
   color: var(--stress-color);
 }
 
-.underlineTooltips .replaceTooltips .tooltipTarget {
+.underlineTooltips .markTooltips .tooltipTarget {
   text-decoration: underline 2px;
 }
 
-.highlightTooltips .replaceTooltips .tooltipTarget {
+.highlightTooltips .markTooltips .tooltipTarget {
   background-color: var(--highlight-color);
 }
