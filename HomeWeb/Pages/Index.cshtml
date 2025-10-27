@@ -7,7 +7,7 @@
     var tTrendy = "Trendy";
     var tMinecraft = "Minecraft";
     var tWeb = "Web";
-    var tSystems = "System";
+    var tSystems = "Systems";
     var tGames = "GameDev";
     var tTTRPG = "TTRPGs";
 
@@ -16,6 +16,7 @@
 
     var items = new List<(string Link, string Title, string Description, string[] tags)>
         {
+        ("https://github.com/DeadlyArtist/Home", "Backend", "This website is hosted on a linux server using nginx, Let's Encrypt, and Razor (C#). Most of my websites are hosted from the same server, automatically pulling updates from GitHub and regularly refreshing encryption.", [tTrendy, tWeb, tSystems]),
         ("https://github.com/DeadlyArtist/KeepTrident", "Keep Trident", "Minecraft mod to make loyalty tridents stay in the inventory when thrown.", [tTrendy, tMinecraft]),
         ("https://github.com/DeadlyArtist/UselessConfigJS", "UselessConfigJS", "Parse .usec files (custom json like format) as JS.", [tTrendy, tSystems]),
         ("https://github.com/DeadlyArtist/DeadlyJS", "DeadlyJS", "A large collection of useful vanilla js and css.", [tTrendy, tWeb]),
@@ -26,6 +27,13 @@
         ("https://redissonance.deadlyartist.com/", "Redissonance", " A TTRPG built around combat. Uses an ultra lightweight system designed to quickly get combats running that are interesting by default. Includes a local free character creator to get started immediately.", [tTTRPG]),
         };
 }
+
+<div>
+    <h1 class="w-100 centeredText">Hi, it's me, Deadly Artist!</h1>
+    <p>I love everything that has to do with programming, whether frontend, backend, game dev, systems, you name it. As such, I have experience with C#, Python, Java, JS/Html/CSS, PHP, C, and more. There's multiple ongoing projects (such as a roguelike unity game and a custom rust/zig/odin-like data oriented programming language with its own compiler) that I'm excited to share somethimes in the future. However, there's also plenty non programming hobbies I love to pursue during free time, such as designing TTRPGs or writing books. Below is an evergrowing list of my public (mostly open source) projects.</p>
+</div>
+
+<div class="hb-6"></div>
 
 <div class="listVertical w-100 gap-4">
     <div class="tag-filters">
@@ -38,7 +46,7 @@
     <div class="masonryGrid" gap-x="20" gap-y="20" min-width="400" center-at-start>
         @foreach (var item in items)
         {
-            <a class="masonryGridItem largeElement bordered hoverable" href="@item.Link" target="_blank" data-tags="@string.Join(",", item.tags)">
+            <a class="masonryGridItem largeElement bordered hoverable @(item.tags.Contains(tDefault) ? "" : "hide")" href="@item.Link" target="_blank" data-tags="@string.Join(",", item.tags)">
                 <h1>@item.Title</h1>
                 @item.Description
             </a>

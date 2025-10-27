@@ -241,3 +241,7 @@ b {
 .centerContentHorizontally {
     justify-content: center;
 }
+
+.centeredText {
+  text-align: center;
+}
