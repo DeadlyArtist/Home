@@ -157,8 +157,8 @@ b {
     font-style: italic;
 }
 
-*:disabled, [disabled] {
-    opacity: 0.3;
+*:disabled:not(.hideDisabled), [disabled]:not(.hideDisabled) {
+  opacity: 0.3;
 }
 
 .maxHeight-1 {

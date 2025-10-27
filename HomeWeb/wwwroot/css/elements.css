@@ -28,6 +28,10 @@
     outline: var(--border-color) auto 1px;
 }
 
+.bordered-inset {
+  box-shadow: inset 0 0 0 1px var(--border-color);
+}
+
 .raised {
     background: var(--raised-background-color);
 }

@@ -2,25 +2,76 @@
 @model IndexModel
 @{
     ViewData["Title"] = "Projects";
+
+    var tAll = "All";
+    var tTrendy = "Trendy";
+    var tMinecraft = "Minecraft";
+    var tWeb = "Web";
+    var tGames = "GameDev";
+    var tTTRPG = "TTRPGs";
+
+    var tags = new[] { tAll, tTrendy, tWeb, tMinecraft, tGames, tTTRPG };
+    var tDefault = tTrendy;
+
+    var items = new List<(string Link, string Title, string Description, string[] tags)>
+        {
+        ("https://github.com/DeadlyArtist/KeepTrident", "Keep Trident", "Minecraft mod to make loyalty tridents stay in the inventory when thrown.", [tTrendy, tMinecraft]),
+        ("https://github.com/DeadlyArtist/DeadlyJS", "DeadlyJS", "A large collection of useful vanilla js and css.", [tTrendy, tWeb]),
+        ("https://github.com/DeadlyArtist/TruePixelPerfectUnity", "PixelPerfect for Unity", "Effortlessly achieve pixel perfection in Unity.", [tTrendy, tGames]),
+        ("https://uniquewarriors.deadlyartist.com/", "Cyberfantasy: Unique Warriors", "A Cyberfantasy TTRPG created for epic combats in a mix of dystopian Cyberpunk, magical High Fantasy, and interdimensional SciFi. Includes a local free character creator to get started immediately.", [tTrendy, tTTRPG]),
+        ("https://github.com/DeadlyArtist/aidevsuite", "aidevsuite", "Automatically and quickly create tools by hand or with AI. Simple syntax allows quickly iterating through and creating highly specific tools for you or your clients without the need to go through the pain and effort of setting up yet another website.", [tTrendy, tWeb]),
+        ("https://github.com/DeadlyArtist/MinecraftProgression", "More Progression", "A massive minecraft mod that builds upon and extends vanilla minecraft progression. Default minecraft progression from wood to stone to iron to diamond is very enjoyable, but too short. To that end, this mod introduces new tiers, a custom tool and armor upgrade system, gourmet food, monster squads, and more.", [tTrendy, tMinecraft]),
+        ("https://redissonance.deadlyartist.com/", "Redissonance", " A TTRPG built around combat. Uses an ultra lightweight system designed to quickly get combats running that are interesting by default. Includes a local free character creator to get started immediately.", [tTTRPG]),
+        };
 }
 
-<div class="masonryGrid" gap-x="20" gap-y="20" min-width="400" center-at-start>
-    @{
-        var items = new List<(string Link, string Title, string Description)>
+<div class="listVertical w-100 gap-4">
+    <div class="tag-filters">
+        @foreach (var tag in tags)
         {
-        ("https://github.com/DeadlyArtist/DeadlyJS", "DeadlyJS", "A large collection of useful vanilla js and css."),
-        ("https://github.com/DeadlyArtist/TruePixelPerfectUnity", "PixelPerfect for Unity", "Effortlessly achieve pixel perfection in Unity."),
-        ("https://uniquewarriors.deadlyartist.com/", "Cyberfantasy: Unique Warriors", "A Cyberfantasy TTRPG created for epic combats in a mix of dystopian Cyberpunk, magical High Fantasy, and interdimensional SciFi. Includes a local free character creator to get started immediately."),
-        ("https://github.com/DeadlyArtist/aidevsuite", "aidevsuite", "Automatically and quickly create tools by hand or with AI. Simple syntax allows quickly iterating through and creating highly specific tools for you or your clients without the need to go through the pain and effort of setting up yet another website."),
-        ("https://github.com/DeadlyArtist/MinecraftProgression", "More Progression", "A massive minecraft mod that builds upon and extends vanilla minecraft progression. Default minecraft progression from wood to stone to iron to diamond is very enjoyable, but too short. To that end, this mod introduces new tiers, a custom tool and armor upgrade system, gourmet food, monster squads, and more."),
-        ("https://redissonance.deadlyartist.com/", "Redissonance", " A TTRPG built around combat. Uses an ultra lightweight system designed to quickly get combats running that are interesting by default. Includes a local free character creator to get started immediately."),
-        };
-    }
-    @foreach (var item in items)
-    {
-        <a class="masonryGridItem largeElement bordered hoverable" href="@item.Link" target="_blank">
-            <h1>@item.Title</h1>
-            @item.Description
-        </a>
-    }
+            <button class="largeElement @(tag == tDefault ? "raised bordered-inset" : "hoverable") hideDisabled" data-tag="@tag" @(tag == tDefault ? " disabled" : "")>@tag</button>
+        }
+    </div>
+
+    <div class="masonryGrid" gap-x="20" gap-y="20" min-width="400" center-at-start>
+        @foreach (var item in items)
+        {
+            <a class="masonryGridItem largeElement bordered hoverable" href="@item.Link" target="_blank" data-tags="@string.Join(",", item.tags)">
+                <h1>@item.Title</h1>
+                @item.Description
+            </a>
+        }
+    </div>
+
+    <script>
+        const indexList = document.currentScript.parentElement;
+        const filters = indexList.querySelector(".tag-filters");
+        const grid = indexList.querySelector(".masonryGrid");
+        const buttons = [...filters.querySelectorAll('button')];
+        const items = [...grid.querySelectorAll('.masonryGridItem')];
+
+        buttons.forEach(btn => btn.addEventListener('click', () => {
+            // deactivate all buttons
+            buttons.forEach(b => {
+                b.removeAttribute("disabled");
+                b.classList.add('hoverable');
+                b.classList.remove('raised');
+                b.classList.remove('bordered-inset');
+            });
+            btn.setAttribute("disabled", "");
+            btn.classList.remove('hoverable');
+            btn.classList.add('raised');
+            btn.classList.add('bordered-inset');
+
+            // filter items
+            const tag = btn.dataset.tag;
+            items.forEach(i => {
+                const tags = i.dataset.tags.split(',');
+                if (tag === 'All' || tags.includes(tag)) i.classList.remove('hide');
+                else i.classList.add('hide');
+            });
+
+            grid._masonry.resize();
+        }));
+    </script>
 </div>
