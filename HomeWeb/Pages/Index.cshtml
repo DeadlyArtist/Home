@@ -52,7 +52,7 @@
     <div class="masonryGrid" gap-x="20" gap-y="20" min-width="400" center-at-start>
         @foreach (var item in items)
         {
-            <a class="masonryGridItem largeElement bordered hoverable @(item.tags.Contains(tDefault) ? "" : "hide")" href="@item.Link" target="_blank" data-tags="@string.Join(",", item.tags)">
+            <a class="masonryGridItem largeElement bordered-inset hoverable @(item.tags.Contains(tDefault) ? "" : "hide")" href="@item.Link" target="_blank" data-tags="@string.Join(",", item.tags)">
                 <h1>@item.Title</h1>
                 @item.Description
             </a>
