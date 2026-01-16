@@ -10,13 +10,15 @@
     var tSystems = "Systems";
     var tGames = "GameDev";
     var tTTRPG = "TTRPGs";
+    var tWriting = "Writing";
 
-    var tags = new[] { tAll, tTrendy, tWeb, tMinecraft, tGames, tSystems, tTTRPG };
+    var tags = new[] { tAll, tTrendy, tWeb, tMinecraft, tGames, tSystems, tTTRPG, tWriting };
     var tDefault = tTrendy;
 
     var items = new List<(string Link, string Title, string Description, string[] tags)>
         {
         ("https://github.com/DeadlyArtist/Home", "Backend", "This website is hosted on a linux server using nginx, Let's Encrypt, and Razor (C#). Most of my websites are hosted from the same server, automatically pulling updates from GitHub and regularly refreshing encryption.", [tTrendy, tWeb, tSystems]),
+        ("https://www.royalroad.com/fiction/147122/cyberfantasy-mercenary", "Cyberfantasy: Mercenary", "A novel about Keros and his rise from a nobody to a top dog with massive influence and a large network of connections. In this cyberfantasy world set in a hyper distant future full of tech, magic, and fantastical races that are much stronger than humanity, utterly absurd things are often the status quo. However, the citizens of this world are not too dissimilar from our own, their opinions have simply adjusted to their environment.", [tTrendy, tWriting]),
         ("https://github.com/DeadlyArtist/AncientCompass", "Ancient Compass", "Minecraft mod that adds an ancient compass which points to the nearest ancient city.", [tMinecraft]),
         ("https://github.com/DeadlyArtist/Disgrind", "Disgrind", "Minecraft mod that allows using the grindstone to remove enchantments of your choice from items.", [tMinecraft]),
         ("https://github.com/DeadlyArtist/StaticXPLevels", "Static XP Levels", "Minecraft mod to make the number of XP required for the next level static, regardless of your current level.", [tMinecraft]),
