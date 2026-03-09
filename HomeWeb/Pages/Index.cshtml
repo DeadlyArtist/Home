@@ -5,6 +5,7 @@
 
     var tAll = "All";
     var tTrendy = "Trendy";
+    var tDev = "Dev";
     var tMinecraft = "Minecraft";
     var tWeb = "Web";
     var tSystems = "Systems";
@@ -12,26 +13,26 @@
     var tTTRPG = "TTRPGs";
     var tWriting = "Writing";
 
-    var tags = new[] { tAll, tTrendy, tWeb, tMinecraft, tGames, tSystems, tTTRPG, tWriting };
+    var tags = new[] { tAll, tTrendy, tDev, tWeb, tMinecraft, tGames, tSystems, tTTRPG, tWriting };
     var tDefault = tTrendy;
 
     var items = new List<(string Link, string Title, string Description, string[] tags)>
         {
-        ("https://github.com/DeadlyArtist/Home", "Backend", "This website is hosted on a linux server using nginx, Let's Encrypt, and Razor (C#). Most of my websites are hosted from the same server, automatically pulling updates from GitHub and regularly refreshing encryption.", [tTrendy, tWeb, tSystems]),
+        ("https://github.com/DeadlyArtist/Home", "Backend", "This website is hosted on a linux server using nginx, Let's Encrypt, and Razor (C#). Most of my websites are hosted from the same server, automatically pulling updates from GitHub and regularly refreshing encryption.", [tTrendy, tDev, tWeb, tSystems]),
+        ("https://github.com/DeadlyArtist/aidevsuite", "aidevsuite", "Automatically and quickly create tools by hand or with AI. Simple syntax allows quickly iterating through and creating highly specific tools for you or your clients without the need to go through the pain and effort of setting up yet another website.", [tTrendy, tDev, tWeb]),
+        ("https://github.com/DeadlyArtist/MinecraftProgression", "More Progression", "A massive minecraft mod that builds upon and extends vanilla minecraft progression. Default minecraft progression from wood to stone to iron to diamond is very enjoyable, but too short. To that end, this mod introduces new tiers, a custom tool and armor upgrade system, gourmet food, monster squads, and more.", [tTrendy, tDev, tMinecraft]),
         ("https://www.royalroad.com/fiction/147122/cyberfantasy-mercenary", "Cyberfantasy: Mercenary", "A novel about Keros and his rise from a nobody to a top dog with massive influence and a large network of connections. In this cyberfantasy world set in a hyper distant future full of tech, magic, and fantastical races that are much stronger than humanity, utterly absurd things are often the status quo. However, the citizens of this world are not too dissimilar from our own, their opinions have simply adjusted to their environment.", [tTrendy, tWriting]),
-        ("https://github.com/DeadlyArtist/AncientCompass", "Ancient Compass", "Minecraft mod that adds an ancient compass which points to the nearest ancient city.", [tMinecraft]),
-        ("https://github.com/DeadlyArtist/Disgrind", "Disgrind", "Minecraft mod that allows using the grindstone to remove enchantments of your choice from items.", [tMinecraft]),
-        ("https://github.com/DeadlyArtist/StaticXPLevels", "Static XP Levels", "Minecraft mod to make the number of XP required for the next level static, regardless of your current level.", [tMinecraft]),
-        ("https://github.com/DeadlyArtist/DeadlyEnderdragon", "Deadly Enderdragon", "Minecraft mod to make the Ender Dragon much more aggressive and dangerous without new mechanics.", [tMinecraft]),
-        ("https://github.com/DeadlyArtist/DeadlyEntityData", "Deadly Entity Data", "Minecraft multiplatform library mod to add custom NBT data to entities.", [tMinecraft]),
-        ("https://github.com/DeadlyArtist/InvertedSleep", "Inverted Sleep", "Minecraft mod to invert the sleep so time stops at midday and you need to sleep to start a night.", [tMinecraft]),
-        ("https://github.com/DeadlyArtist/KeepTrident", "Keep Trident", "Minecraft mod to make loyalty tridents stay in the inventory when thrown.", [tTrendy, tMinecraft]),
-        ("https://github.com/DeadlyArtist/UselessConfigJS", "UselessConfigJS", "Parse .usec files (custom json like format) as JS.", [tTrendy, tSystems]),
-        ("https://github.com/DeadlyArtist/DeadlyJS", "DeadlyJS", "A large collection of useful vanilla js and css.", [tTrendy, tWeb]),
-        ("https://github.com/DeadlyArtist/TruePixelPerfectUnity", "PixelPerfect for Unity", "Effortlessly achieve pixel perfection in Unity.", [tTrendy, tGames]),
+        ("https://github.com/DeadlyArtist/DeadlyJS", "DeadlyJS", "A large collection of useful vanilla js and css.", [tTrendy, tDev, tWeb]),
+        ("https://github.com/DeadlyArtist/TruePixelPerfectUnity", "PixelPerfect for Unity", "Effortlessly achieve pixel perfection in Unity.", [tTrendy, tDev, tGames]),
+        ("https://github.com/DeadlyArtist/AncientCompass", "Ancient Compass", "Minecraft mod that adds an ancient compass which points to the nearest ancient city.", [tDev, tMinecraft]),
+        ("https://github.com/DeadlyArtist/Disgrind", "Disgrind", "Minecraft mod that allows using the grindstone to remove enchantments of your choice from items.", [tDev, tMinecraft]),
+        ("https://github.com/DeadlyArtist/StaticXPLevels", "Static XP Levels", "Minecraft mod to make the number of XP required for the next level static, regardless of your current level.", [tDev, tMinecraft]),
+        ("https://github.com/DeadlyArtist/DeadlyEnderdragon", "Deadly Enderdragon", "Minecraft mod to make the Ender Dragon much more aggressive and dangerous without new mechanics.", [tDev, tMinecraft]),
+        ("https://github.com/DeadlyArtist/DeadlyEntityData", "Deadly Entity Data", "Minecraft multiplatform library mod to add custom NBT data to entities.", [tDev, tMinecraft]),
+        ("https://github.com/DeadlyArtist/InvertedSleep", "Inverted Sleep", "Minecraft mod to invert the sleep so time stops at midday and you need to sleep to start a night.", [tDev, tMinecraft]),
+        ("https://github.com/DeadlyArtist/KeepTrident", "Keep Trident", "Minecraft mod to make loyalty tridents stay in the inventory when thrown.", [tTrendy, tDev, tMinecraft]),
+        ("https://github.com/DeadlyArtist/UselessConfigJS", "UselessConfigJS", "Parse .usec files (custom json like format) as JS.", [tTrendy, tDev, tSystems]),
         ("https://uniquewarriors.deadlyartist.com/", "Cyberfantasy: Unique Warriors", "A Cyberfantasy TTRPG created for epic combats in a mix of dystopian Cyberpunk, magical High Fantasy, and interdimensional SciFi. Includes a local free character creator to get started immediately.", [tTrendy, tTTRPG]),
-        ("https://github.com/DeadlyArtist/aidevsuite", "aidevsuite", "Automatically and quickly create tools by hand or with AI. Simple syntax allows quickly iterating through and creating highly specific tools for you or your clients without the need to go through the pain and effort of setting up yet another website.", [tTrendy, tWeb]),
-        ("https://github.com/DeadlyArtist/MinecraftProgression", "More Progression", "A massive minecraft mod that builds upon and extends vanilla minecraft progression. Default minecraft progression from wood to stone to iron to diamond is very enjoyable, but too short. To that end, this mod introduces new tiers, a custom tool and armor upgrade system, gourmet food, monster squads, and more.", [tTrendy, tMinecraft]),
         ("https://redissonance.deadlyartist.com/", "Redissonance", " A TTRPG built around combat. Uses an ultra lightweight system designed to quickly get combats running that are interesting by default. Includes a local free character creator to get started immediately.", [tTTRPG]),
         };
 }
